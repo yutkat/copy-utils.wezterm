@@ -23,22 +23,34 @@ function M.copy_last_command_output(window, pane)
 	window:toast_notification("wezterm", "Copied!", nil, 3000)
 end
 
-local function strip_leading_spaces(text)
-	local lines = {}
+-- Remove the left margin shared by the lines and trailing padding, keeping
+-- relative indentation. The first line is excluded from the margin because a
+-- selection usually starts in the middle of it.
+local function strip_margin(text)
+	local lines, margin = {}, nil
 	for line in (text .. "\n"):gmatch("(.-)\n") do
-		table.insert(lines, (line:gsub("^[ \t]+", "")))
+		line = line:gsub("[ \t]+$", "")
+		if #lines > 0 and line ~= "" then
+			local indent = #line:match("^[ \t]*")
+			margin = math.min(margin or indent, indent)
+		end
+		table.insert(lines, line)
+	end
+	lines[1] = lines[1]:gsub("^[ \t]+", "")
+	for i = 2, #lines do
+		lines[i] = lines[i]:sub((margin or 0) + 1)
 	end
 	return table.concat(lines, "\n")
 end
 
--- Copy the current selection with the leading whitespace of each line
--- removed. Useful for pasting TUI output that is rendered with a left margin.
+-- Copy the current selection without the left margin and trailing padding
+-- that TUIs (e.g. coding agents) render, keeping relative indentation.
 function M.copy_without_leading_spaces(window, pane)
 	local text = window:get_selection_text_for_pane(pane)
 	if text == nil or text == "" then
 		return
 	end
-	window:copy_to_clipboard(strip_leading_spaces(text), "ClipboardAndPrimarySelection")
+	window:copy_to_clipboard(strip_margin(text), "ClipboardAndPrimarySelection")
 	window:toast_notification("wezterm", "Copied!", nil, 3000)
 end
 

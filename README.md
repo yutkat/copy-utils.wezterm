@@ -4,9 +4,9 @@ Extra copy actions for [WezTerm](https://wezterm.org/):
 
 - `CopyLastCommandOutput` — copy the output of the last command, located via
   the semantic zones provided by shell integration (OSC 133)
-- `CopyWithoutLeadingSpaces` — copy the current selection with the leading
-  whitespace of each line removed; useful for pasting TUI output that is
-  rendered with a left margin
+- `CopyWithoutLeadingSpaces` — copy the current selection without the left
+  margin and trailing padding that TUIs (e.g. coding agents) render, keeping
+  relative indentation
 
 ## Installation and usage
 
